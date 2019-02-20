@@ -5,32 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/events/login_events.dart';
 import '../../bloc/states/login_states.dart';
 import '../../bloc/login_bloc.dart';
-import '../../bloc/authentication_bloc.dart';
 
-class LoginForm extends StatefulWidget {
-  final LoginBloc loginBloc;
-  final AuthenticationBloc authenticationBloc;
-
-  LoginForm({
-    Key key,
-    @required this.loginBloc,
-    @required this.authenticationBloc,
-  }) : super(key: key);
-
-  @override
-  _LoginFormState createState() => _LoginFormState();
-}
-
-class _LoginFormState extends State<LoginForm> {
+class LoginForm extends StatelessWidget {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  LoginBloc get _loginBloc => widget.loginBloc;
-
   @override
   Widget build(BuildContext context) {
+    final LoginBloc loginBloc = BlocProvider.of(context);
     return BlocBuilder<LoginEvent, LoginState>(
-      bloc: _loginBloc,
+      bloc: loginBloc,
       builder: (
         BuildContext context,
         LoginState state,
@@ -57,8 +41,9 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: true,
               ),
               RaisedButton(
-                onPressed:
-                    state is! LoginLoading ? _onLoginButtonPressed : null,
+                onPressed: state is! LoginLoading
+                    ? () => _onLoginButtonPressed(loginBloc)
+                    : null,
                 child: Text('Login'),
               ),
               Container(
@@ -78,8 +63,8 @@ class _LoginFormState extends State<LoginForm> {
     });
   }
 
-  _onLoginButtonPressed() {
-    _loginBloc.dispatch(
+  _onLoginButtonPressed(LoginBloc loginBloc) {
+    loginBloc.dispatch(
       LoginButtonPressed(
         username: _usernameController.text,
         password: _passwordController.text,
